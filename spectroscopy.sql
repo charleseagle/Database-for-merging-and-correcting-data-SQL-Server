@@ -128,7 +128,7 @@ GO
 
 --DROP SCHEMA Spectra;
 
--- Create tables
+-- Create tables for loading data
 CREATE TABLE [2H].[UV](
     [Frequency] [float] NOT NULL,
     [Intensity] [float] NOT NULL
@@ -214,9 +214,6 @@ WITH (
    TABLOCK   
 );
 
-SELECT * FROM [2H].[UV];
-
-TRUNCATE TABLE [2H].[UV];
 
 BULK INSERT [Spectroscopy].[2H].[UV_Al] FROM N'E:\SQL_Server_Practice\2H\_2H_AL_U.SP_xy.asc'
 WITH (
@@ -295,13 +292,12 @@ ALTER TABLE [2H].[FIR_12] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
--- Add CLUSTERED INDEXes
-
-CREATE CLUSTERED CLUSTERED INDEX [IX_FIR_12_Frequency] ON [2H].[FIR_12]([Frequency]) ON [PRIMARY];
+-- Add NONCLUSTERED INDEXes
+CREATE NONCLUSTERED INDEX [IX_FIR_12_Intensity] ON [2H].[FIR_12]([Intensity]) ON [PRIMARY];
 GO
 
-ALTER TABLE [2H].[FIR_12]
-    DROP CONSTRAINT PK_FIR_12_Frequency
+--ALTER TABLE [2H].[FIR_12]
+--    DROP CONSTRAINT PK_FIR_12_Frequency
 
 ALTER TABLE [2H].[FIR_23] WITH CHECK ADD 
     CONSTRAINT [PK_FIR_23_Frequency] PRIMARY KEY CLUSTERED 
@@ -310,10 +306,8 @@ ALTER TABLE [2H].[FIR_23] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
-CREATE CLUSTERED CLUSTERED INDEX [IX_FIR_23_Frequency] ON [2H].[FIR_23]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_FIR_23_Intensity] ON [2H].[FIR_23]([Intensity]) ON [PRIMARY];
 GO
-
-DROP CLUSTERED INDEX [2H].[FIR_35].[IX_FIR_35_Frequency];
 
 ALTER TABLE [2H].[FIR_35] WITH CHECK ADD 
     CONSTRAINT [PK_FIR_35_Frequency] PRIMARY KEY CLUSTERED 
@@ -322,7 +316,7 @@ ALTER TABLE [2H].[FIR_35] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
-CREATE CLUSTERED CLUSTERED INDEX [IX_FIR_35_Frequency] ON [2H].[FIR_35]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_FIR_35_Intensity] ON [2H].[FIR_35]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[FIR_50] WITH CHECK ADD 
@@ -332,7 +326,7 @@ ALTER TABLE [2H].[FIR_50] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
-CREATE CLUSTERED CLUSTERED INDEX [IX_FIR_50_Frequency] ON [2H].[FIR_50]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_FIR_50_Intensity] ON [2H].[FIR_50]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[MIR] WITH CHECK ADD 
@@ -342,7 +336,7 @@ ALTER TABLE [2H].[MIR] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
-CREATE CLUSTERED CLUSTERED INDEX [IX_MIR_Frequency] ON [2H].[MIR]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_MIR_Intensity] ON [2H].[MIR]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[MIR_Al] WITH CHECK ADD 
@@ -351,9 +345,9 @@ ALTER TABLE [2H].[MIR_Al] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_MIR_Al_Frequency] ON [2H].[MIR_Al]([Frequency]) ON [PRIMARY];
-GO
 
+CREATE NONCLUSTERED INDEX [IX_MIR_Al_Intensity] ON [2H].[MIR_Al]([Intensity]) ON [PRIMARY];
+GO
 
 ALTER TABLE [2H].[MNIR] WITH CHECK ADD 
     CONSTRAINT [PK_MNIR_Frequency] PRIMARY KEY CLUSTERED 
@@ -361,7 +355,8 @@ ALTER TABLE [2H].[MNIR] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED CLUSTERED INDEX [IX_MNIR_Frequency] ON [2H].[MNIR]([Frequency]) ON [PRIMARY];
+
+CREATE NONCLUSTERED INDEX [IX_MNIR_Intensity] ON [2H].[MNIR]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[MNIR_Al] WITH CHECK ADD 
@@ -370,7 +365,8 @@ ALTER TABLE [2H].[MNIR_Al] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED CLUSTERED INDEX [IX_MNIR_Al_Frequency] ON [2H].[MNIR_Al]([Frequency]) ON [PRIMARY];
+
+CREATE NONCLUSTERED INDEX [IX_MNIR_Al_Intensity] ON [2H].[MNIR_Al]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[NIR] WITH CHECK ADD 
@@ -379,7 +375,8 @@ ALTER TABLE [2H].[NIR] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED CLUSTERED INDEX [IX_NIR_Frequency] ON [2H].[NIR]([Frequency]) ON [PRIMARY];
+
+CREATE NONCLUSTERED INDEX [IX_NIR_Intensity] ON [2H].[NIR]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[NIR_Al] WITH CHECK ADD 
@@ -388,9 +385,9 @@ ALTER TABLE [2H].[NIR_Al] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_NIR_Al_Frequency] ON [2H].[NIR_Al]([Frequency]) ON [PRIMARY];
-GO
 
+CREATE NONCLUSTERED INDEX [IX_NIR_Al_Intensity] ON [2H].[NIR_Al]([Intensity]) ON [PRIMARY];
+GO
 
 ALTER TABLE [2H].[UV] WITH CHECK ADD 
     CONSTRAINT [PK_UV_Frequency] PRIMARY KEY CLUSTERED 
@@ -398,7 +395,8 @@ ALTER TABLE [2H].[UV] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_UV_Frequency] ON [2H].[UV]([Frequency]) ON [PRIMARY];
+
+CREATE NONCLUSTERED INDEX [IX_UV_Intensity] ON [2H].[UV]([Intensity]) ON [PRIMARY];
 GO
 
 ALTER TABLE [2H].[UV_Al] WITH CHECK ADD 
@@ -408,18 +406,15 @@ ALTER TABLE [2H].[UV_Al] WITH CHECK ADD
     )  ON [PRIMARY];
 GO
 
-CREATE CLUSTERED INDEX [IX_UV_Al_Frequency] ON [2H].[UV_Al]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_UV_Al_Intensity] ON [2H].[UV_Al]([Intensity]) ON [PRIMARY];
 GO
 
-
-
-CREATE TABLE [Spectroscopy].[2H].[FIR_MERGE](
+CREATE TABLE [Spectroscopy].[2H].[FIR_MERGE]
+(
     [Frequency] [float] NOT NULL,
     [Intensity] [float] NOT NULL
 ) ON [PRIMARY];
 GO
-
-TRUNCATE TABLE [2H].[FIR_MERGE];
 
 INSERT INTO [2H].[FIR_MERGE]
 SELECT [Frequency], [Intensity] FROM [2H].[FIR_35]
@@ -430,16 +425,9 @@ SELECT [Frequency], [Intensity] FROM [2H].[FIR_12]
 UNION
 SELECT [Frequency], [Intensity] FROM [2H].[FIR_50];
 GO
-ALTER TABLE [2H].[FIR_MERGE] WITH CHECK ADD 
-    CONSTRAINT [PK_FIR_MERGE_Frequency] PRIMARY KEY CLUSTERED 
-    (
-        [Frequency]
-    )  ON [PRIMARY];
-GO
-CREATE CLUSTERED INDEX [IX_FIR_MERGE_Frequency] ON [2H].[FIR_MERGE]([Frequency]) ON [PRIMARY];
-GO
 
-SELECT * FROM [2H].[FIR_MERGE];
+CREATE NONCLUSTERED INDEX [IX_FIR_MERGE_Intensity] ON [2H].[FIR_MERGE]([Intensity]) ON [PRIMARY];
+GO
 
 --The bcp command for output in powershell
 --bcp Spectroscopy.[2H].[FIR_50] out E:\SQL_Server_Practice\FIR_50.txt -S EAGLE -T -c
@@ -454,9 +442,9 @@ SELECT * FROM [2H].[FIR_MERGE];
 --DROP CONSTRAINT [PK_FIR_MERGE_Frequency];
 
 
-DROP TABLE [2H].[NIR_Corrected];
-DROP TABLE [2H].[MIR_Corrected];
-DROP TABLE [2H].[UV_Corrected];
+--DROP TABLE [2H].[NIR_Corrected];
+--DROP TABLE [2H].[MIR_Corrected];
+--DROP TABLE [2H].[UV_Corrected];
 
 
 CREATE TABLE [Spectroscopy].[2H].[UV_Corrected](
@@ -470,8 +458,6 @@ CREATE TABLE [Spectroscopy].[2H].[NIR_Corrected](
     [Intensity] [float] NOT NULL
 ) ON [PRIMARY];
 GO
-
-
 
 
 CREATE TABLE [Spectroscopy].[2H].[MIR_Corrected](
@@ -494,9 +480,9 @@ ALTER TABLE [2H].[UV_Corrected] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_UV_Corrected_Frequency] ON [2H].[UV_Corrected]([Frequency]) ON [PRIMARY];
-GO
 
+CREATE NONCLUSTERED INDEX [IX_UV_Corrected_Intensity] ON [2H].[UV_Corrected]([Intensity]) ON [PRIMARY];
+GO
 
 INSERT INTO [Spectroscopy].[2H].[NIR_Corrected]
 SELECT [2H].[NIR].Frequency, [2H].[NIR].Intensity/[2H].[NIR_Al].Intensity AS Intensity 
@@ -509,9 +495,9 @@ ALTER TABLE [2H].[NIR_Corrected] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_NIR_Corrected_Frequency] ON [2H].[NIR_Corrected]([Frequency]) ON [PRIMARY];
-GO
 
+CREATE NONCLUSTERED INDEX [IX_NIR_Corrected_Intensity] ON [2H].[NIR_Corrected]([Intensity]) ON [PRIMARY];
+GO
 
 INSERT INTO [Spectroscopy].[2H].[MIR_Corrected]
 SELECT [2H].[MIR].Frequency, [2H].[MIR].Intensity/[2H].[MIR_Al].Intensity AS Intensity 
@@ -524,7 +510,8 @@ ALTER TABLE [2H].[MIR_Corrected] WITH CHECK ADD
         [Frequency]
     )  ON [PRIMARY];
 GO
-CREATE CLUSTERED INDEX [IX_MIR_Corrected_Frequency] ON [2H].[MIR_Corrected]([Frequency]) ON [PRIMARY];
+
+CREATE NONCLUSTERED INDEX [IX_MIR_Corrected_Intensity] ON [2H].[MIR_Corrected]([Intensity]) ON [PRIMARY];
 GO
 
 CREATE TABLE [Spectroscopy].[2H].[MERGE](
@@ -552,7 +539,6 @@ WHERE [Frequency] > 11682.24299;
 DELETE FROM [2H].[UV_Corrected]
 WHERE [Frequency] < 11655.01166;
 
-TRUNCATE TABLE [2H].[MERGE];
 --Union tables as counting the spectrum shift
 DECLARE @MIR float = (SELECT A.[Intensity] - B.[Intensity] AS Diff 
 FROM [2H].[FIR_MERGE] AS A, [2H].[MIR_Corrected] AS B
@@ -577,14 +563,7 @@ SELECT [Frequency], [Intensity] + @MIR + @NIR + @UV AS Intensity
 FROM [2H].[UV_Corrected];
 GO
 
-ALTER TABLE [2H].[MERGE] WITH CHECK ADD 
-    CONSTRAINT [PK_MERGE_Frequency] PRIMARY KEY CLUSTERED 
-    (
-        [Frequency]
-    )  ON [PRIMARY];
-GO
-
-CREATE CLUSTERED INDEX [IX_MERGE_Frequency] ON [2H].[MERGE]([Frequency]) ON [PRIMARY];
+CREATE NONCLUSTERED INDEX [IX_MERGE_Intensity] ON [2H].[MERGE]([Intensity]) ON [PRIMARY];
 GO
 
 --Template for calculating the spectrum shift
