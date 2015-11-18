@@ -418,16 +418,21 @@ CREATE TABLE [Spectroscopy].[2H].[FIR_MERGE](
 ) ON [PRIMARY];
 GO
 
-
+TRUNCATE TABLE [2H].[FIR_MERGE];
 
 INSERT INTO [2H].[FIR_MERGE]
 SELECT * FROM [2H].[FIR_35]
-UNION 
+UNION
 SELECT * FROM [2H].[FIR_23]
-UNION 
+UNION
 SELECT * FROM [2H].[FIR_12]
-UNION 
+UNION
 SELECT * FROM [2H].[FIR_50];
+
+SELECT * FROM [2H].[FIR_MERGE];
+
+--The bcp command for output in powershell
+--bcp Spectroscopy.[2H].[FIR_50] out E:\SQL_Server_Practice\FIR_50.txt -S EAGLE -T -c
 
 --ALTER TABLE [2H].[FIR_MERGE] WITH CHECK ADD 
 --    CONSTRAINT [PK_FIR_MERGE_Frequency] PRIMARY KEY CLUSTERED 
@@ -442,7 +447,9 @@ CREATE INDEX [IX_FIR_MERGE_Frequency] ON [2H].[FIR_MERGE]([Frequency], [Intensit
 GO
 
 
-SELECT * FROM [2H].[FIR_MERGE];
+DROP TABLE [2H].[NIR_Corrected];
+DROP TABLE [2H].[MIR_Corrected];
+DROP TABLE [2H].[UV_Corrected];
 
 
 CREATE TABLE [Spectroscopy].[2H].[UV_Corrected](
@@ -458,7 +465,7 @@ CREATE TABLE [Spectroscopy].[2H].[NIR_Corrected](
 GO
 
 
---DROP TABLE [Spectroscopy].[2H].[MIR_Corrected]
+
 
 CREATE TABLE [Spectroscopy].[2H].[MIR_Corrected](
     [Frequency] [float] NOT NULL,
@@ -466,7 +473,8 @@ CREATE TABLE [Spectroscopy].[2H].[MIR_Corrected](
 ) ON [PRIMARY];
 GO
 
-TRUNCATE TABLE [2H].[NIR_Corrected];
+--Correct light scattering
+
 
 INSERT INTO [Spectroscopy].[2H].[UV_Corrected]
 SELECT [2H].[UV].Frequency, [2H].[UV].Intensity/[2H].[UV_Al].Intensity AS Intensity FROM [2H].[UV], [2H].[UV_Al] WHERE [2H].[UV].Frequency = [2H].[UV_Al].Frequency;
@@ -492,7 +500,7 @@ ALTER TABLE [2H].[NIR_Corrected] WITH CHECK ADD
 GO
 CREATE INDEX [IX_NIR_Corrected_Frequency] ON [2H].[NIR_Corrected]([Frequency], [Intensity]) ON [PRIMARY];
 GO
---SELECT * FROM [2H].[MIR_Corrected]
+
 
 INSERT INTO [Spectroscopy].[2H].[MIR_Corrected]
 SELECT [2H].[MIR].Frequency, [2H].[MIR].Intensity/[2H].[MIR_Al].Intensity AS Intensity FROM [2H].[MIR], [2H].[MIR_Al] WHERE [2H].[MIR].Frequency = [2H].[MIR_Al].Frequency;
@@ -512,18 +520,58 @@ CREATE TABLE [Spectroscopy].[2H].[MERGE](
 ) ON [PRIMARY];
 GO
 
-SELECT * FROM [2H].[MERGE];
+--Delete rows for table union
+DELETE FROM [2H].[FIR_MERGE]
+WHERE Frequency > 640.37;
+
+DELETE FROM [2H].[MIR_Corrected]
+WHERE Frequency < 640.3677;
+
+DELETE FROM [2H].[MIR_Corrected]
+WHERE Frequency > 4930.05973;
+
+DELETE FROM [2H].[NIR_Corrected]
+WHERE Frequency < 4930.966469;
+
+DELETE FROM [2H].[NIR_Corrected]
+WHERE Frequency > 11682.24299;
+
+DELETE FROM [2H].[UV_Corrected]
+WHERE Frequency < 11655.01166;
 
 TRUNCATE TABLE [2H].[MERGE];
+--Union tables as counting the spectrum shift
+DECLARE @MIR float = (SELECT A.Intensity - B.Intensity AS Diff 
+FROM [2H].[FIR_MERGE] AS A, [2H].[MIR_Corrected] AS B
+WHERE A.Frequency = 640.37 AND B.Frequency = 640.3677)
+, @NIR float = (SELECT A.Intensity - B.Intensity AS Diff 
+FROM [2H].[MIR_Corrected] AS A, [2H].[NIR_Corrected] AS B
+WHERE A.Frequency = 4930.05973 AND B.Frequency = 4930.966469)
+, @UV float = (SELECT A.Intensity - B.Intensity AS Diff 
+FROM [2H].[NIR_Corrected] AS A, [2H].[UV_Corrected] AS B
+WHERE A.Frequency = 11682.24299 AND B.Frequency = 11655.01166) ;
 
 INSERT INTO [2H].[MERGE]
-SELECT * FROM [2H].[FIR_MERGE]
+SELECT Frequency, Intensity FROM [2H].[FIR_MERGE]
 UNION ALL
-SELECT * FROM [2H].[MIR_Corrected]
+SELECT Frequency, Intensity + @MIR AS Intensity
+FROM [2H].[MIR_Corrected]
 UNION ALL
-SELECT * FROM [2H].[NIR_Corrected]
+SELECT Frequency, Intensity + @MIR + @NIR AS Intensity
+FROM [2H].[NIR_Corrected]
 UNION ALL
-SELECT * FROM [2H].[UV_Corrected];
+SELECT Frequency, Intensity + + @MIR + @NIR + @UV AS Intensity
+FROM [2H].[UV_Corrected];
+GO
+
 
 CREATE INDEX [IX_MERGE_Frequency] ON [2H].[MERGE]([Frequency], [Intensity]) ON [PRIMARY];
 GO
+
+--Template for calculating the spectrum shift
+(SELECT A.Intensity - B.Intensity AS Diff 
+FROM [2H].[NIR_Corrected] AS A, [2H].[UV_Corrected] AS B
+WHERE A.Frequency = 11682.24299 AND B.Frequency = 11655.01166)
+
+--The bcp command for output in powershell
+--bcp Spectroscopy.[2H].[UV_Corrected] out E:\SQL_Server_Practice\UV_Corrected.txt -S EAGLE -T -c
